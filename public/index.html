@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>React Chat</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.8/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.8/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.js"></script>
+    <script type="text/babel">
+      var socket = io();
+
+      var Chat = React.createClass({
+
+        getInitialState: function() {
+          return {messages: []};
+        },
+
+        sendMessage: function(ev) {
+          ev.preventDefault();
+          socket.emit('message', this.input.value);
+          this.input.value = '';
+        },
+
+        componentDidMount: function() {
+          socket.on('chat message', function(message) {
+            this.setState({messages: this.state.messages.concat(message)});
+          }.bind(this));
+        },
+
+        render: function() {
+          return (
+            <form onSubmit={this.sendMessage}>
+              <ul>
+                {this.state.messages.map(function(message, i) {
+                  return <li key={i}>{message}</li>;
+                })}
+              </ul>
+              <input
+                ref={(function(node) {
+                  this.input = node;
+                }).bind(this)}
+                placeholder="Type your message" />
+              <button>Send</button>
+            </form>
+          );
+        }
+      })
+      ReactDOM.render(<Chat />, document.querySelector('#root'));
+    </script>
+  </body>
+</html>
